@@ -4,6 +4,7 @@ from datetime import datetime
 import sys
 sys.path.append("/opt/airflow")
 from src.data.ingest_data import ingest_data
+from src.data.validate_data import validate_data
 
 default_args = {
     "owner": "mlops",
@@ -30,9 +31,15 @@ with DAG(
         provide_context=True,
     )
 
+    validate = PythonOperator(
+        task_id = "validate_data",
+        python_callable = validate_data,
+        provide_context = True
+    )
+
     end = PythonOperator(
         task_id="end",
         python_callable=lambda: print("Pipeline finished"),
     )
 
-    start >> ingest >> end
+    start >> ingest >> validate >> end
