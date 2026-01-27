@@ -5,7 +5,7 @@ import sys
 sys.path.append("/opt/airflow")
 from src.data.ingest_data import ingest_data
 from src.data.validate_data import validate_data
-
+from src.features.build_features import build_features
 default_args = {
     "owner": "mlops",
     "retries": 1,
@@ -37,9 +37,15 @@ with DAG(
         provide_context = True
     )
 
+    features = PythonOperator(
+        task_id = "build_features",
+        python_callable = build_features,
+        provide_context = True
+    )
+
     end = PythonOperator(
         task_id="end",
         python_callable=lambda: print("Pipeline finished"),
     )
 
-    start >> ingest >> validate >> end
+    start >> ingest >> validate >> features >> end
