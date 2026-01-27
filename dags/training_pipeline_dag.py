@@ -6,10 +6,13 @@ sys.path.append("/opt/airflow")
 from src.data.ingest_data import ingest_data
 from src.data.validate_data import validate_data
 from src.features.build_features import build_features
+from src.training.train_model import train_model
 default_args = {
     "owner": "mlops",
     "retries": 1,
 }
+MODEL_LIST = ["logistic", "random_forest", "xgboost", "lightgbm"]
+
 
 with DAG(
     dag_id="ml_training_pipeline",
@@ -43,9 +46,21 @@ with DAG(
         provide_context = True
     )
 
+
+    train_tasks = []
+    for model_name in MODEL_LIST:
+        task = PythonOperator(
+            task_id = f"train_{model_name}",
+            python_callable = train_model,
+            op_kwargs = {"model_name":model_name},
+            provide_context = True
+        )
+        train_tasks.append(task)
+
     end = PythonOperator(
         task_id="end",
         python_callable=lambda: print("Pipeline finished"),
     )
 
-    start >> ingest >> validate >> features >> end
+    start >> ingest >> validate >> features 
+    features >> train_tasks >> end
