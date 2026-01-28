@@ -7,7 +7,10 @@ from src.data.ingest_data import ingest_data
 from src.data.validate_data import validate_data
 from src.features.build_features import build_features
 from src.training.train_model import train_model
+from src.evaluation.select_best_model import select_best_model
+
 default_args = {
+    
     "owner": "mlops",
     "retries": 1,
 }
@@ -57,10 +60,17 @@ with DAG(
         )
         train_tasks.append(task)
 
+    select_model = PythonOperator(
+    task_id="select_best_model",
+    python_callable=select_best_model,
+    provide_context=True,
+    )
+
+
     end = PythonOperator(
         task_id="end",
         python_callable=lambda: print("Pipeline finished"),
     )
 
     start >> ingest >> validate >> features 
-    features >> train_tasks >> end
+    features >> train_tasks >> select_model >> end
