@@ -15,4 +15,5 @@ mlruns/
 mlflow.db
 
 # Data
-data/
+data/raw
+data/processed
