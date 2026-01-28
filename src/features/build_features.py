@@ -11,9 +11,10 @@ def build_features(**context):
     df["sepal_area"] = df["sepal_length"] * df["sepal_width"]
     df["petal_area"] = df["petal_length"] * df["petal_width"]
 
-    DATA_DIR = os.getenv("AIRFLOW_DATA_DIR", "/opt/airflow/data")
+    DATA_DIR = "/opt/airflow/tmp"
     output_path = os.path.join(DATA_DIR, "processed")
     os.makedirs(output_path, exist_ok=True)
+
 
     feature_path = os.path.join(output_path, "features.csv")
     df.to_csv(feature_path, index = False)

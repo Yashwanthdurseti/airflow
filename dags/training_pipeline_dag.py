@@ -8,6 +8,7 @@ from src.data.validate_data import validate_data
 from src.features.build_features import build_features
 from src.training.train_model import train_model
 from src.evaluation.select_best_model import select_best_model
+from src.evaluation.register_model import register_best_model
 
 default_args = {
     
@@ -61,10 +62,21 @@ with DAG(
         train_tasks.append(task)
 
     select_model = PythonOperator(
+        
     task_id="select_best_model",
     python_callable=select_best_model,
     provide_context=True,
+        
     )
+
+    register = PythonOperator(
+        
+    task_id="register_best_model",
+    python_callable=register_best_model,
+    provide_context=True,
+        
+    )
+
 
 
     end = PythonOperator(
@@ -73,4 +85,4 @@ with DAG(
     )
 
     start >> ingest >> validate >> features 
-    features >> train_tasks >> select_model >> end
+    features >> train_tasks >> select_model >> register >> end
